@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votaciones - Liceo Elio Valmores Castellano</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandBg: '#f0f7ff',
+                        brandBlue: '#0284c7',
+                        brandDarkBlue: '#0369a1',
+                        brandLightBlue: '#e0f2fe',
+                        brandAccent: '#38bdf8'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f7ff;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-brandBg text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Principal -->
+    <header class="bg-white border-b border-sky-100 shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('home')">
+                <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md border-2 border-sky-200">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-sm md:text-base leading-tight">Liceo Elio Valmores Castellano</h1>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-sky-600 font-semibold tracking-wide">PROMO XXXV</span>
+                        <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full border border-sky-200"><i class="fa-solid fa-code text-[9px] mr-1"></i> Hearry Silva</span>
+                    </div>
+                </div>
+            </div>
+            <div id="userBadge" class="hidden flex items-center space-x-2 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-full text-xs text-sky-800 font-medium">
+                <i class="fa-solid fa-user-check text-sky-600"></i>
+                <span id="badgeUserName">Cargando...</span>
+                <button onclick="logoutUser()" class="ml-2 text-rose-500 hover:text-rose-700 font-bold text-xs" title="Cerrar sesión">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal Alert/Notification Custom -->
+    <div id="customModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-sky-100 text-center transform transition-all scale-100">
+            <div id="modalIcon" class="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl bg-sky-100 text-sky-600">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h3 id="modalTitle" class="font-bold text-lg text-slate-800 mb-2">Aviso</h3>
+            <p id="modalMessage" class="text-sm text-slate-600 mb-5">Mensaje informativo</p>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition">Entendido</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:p-6">
+
+        <!-- 1. PANTALLA DE INICIO -->
+        <section id="viewHome" class="flex flex-col items-center justify-center py-10 md:py-16 text-center space-y-8">
+            <!-- Logo Centrado Grandes Dimensiones -->
+            <div class="relative">
+                <div class="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-tr from-sky-500 to-sky-300 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                    <i class="fa-solid fa-school text-white text-6xl md:text-7xl"></i>
+                </div>
+                <span class="absolute -bottom-2 bg-sky-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md uppercase tracking-wider">L.N.E.V.C</span>
+            </div>
+
+            <div class="max-w-md space-y-2">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Votaciones Oficiales</h2>
+                <p class="text-sky-700 text-sm md:text-base font-medium">Liceo "Elio Valmores Castellano" — Promo XXXV</p>
+                <div class="inline-flex items-center space-x-1 bg-sky-100/80 text-sky-900 text-xs font-semibold px-3 py-1 rounded-full border border-sky-200">
+                    <i class="fa-solid fa-laptop-code text-sky-600"></i>
+                    <span>Desarrollado y Organizado por <strong>Hearry Silva</strong></span>
+                </div>
+                <p class="text-slate-500 text-xs md:text-sm pt-1">Participa en la decisión para definir la vestimenta oficial representativa de la promoción.</p>
+            </div>
+
+            <!-- Banner Dispositivo Registrado -->
+            <div id="deviceBoundNotice" class="hidden max-w-sm w-full bg-amber-50 border border-amber-200 p-3 rounded-2xl text-xs text-amber-800 flex items-center space-x-3">
+                <i class="fa-solid fa-shield-halved text-amber-600 text-xl"></i>
+                <div class="text-left">
+                    <span class="font-bold block">Dispositivo Vinculado</span>
+                    <span id="deviceBoundUserText">Tu dispositivo ya tiene una cuenta registrada.</span>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="w-full max-w-xs space-y-4 pt-2">
+                <button onclick="handleVotarClick()" class="w-full py-3.5 px-6 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl shadow-lg shadow-sky-500/30 hover:shadow-sky-500/50 transition-all flex items-center justify-center space-x-3 group">
+                    <i class="fa-solid fa-vote-yea text-lg group-hover:scale-110 transition-transform"></i>
+                    <span class="text-base tracking-wide">VOTAR</span>
+                </button>
+
+                <button onclick="openAdminAuthModal()" class="w-full py-3.5 px-6 bg-white hover:bg-slate-50 text-sky-800 font-semibold border-2 border-sky-200 hover:border-sky-300 rounded-2xl shadow-sm transition-all flex items-center justify-center space-x-3">
+                    <i class="fa-solid fa-user-shield text-sky-600"></i>
+                    <span class="text-sm">Ingresar como Administrador</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. REGISTRO STRICTO DE ESTUDIANTE -->
+        <section id="viewRegister" class="hidden max-w-md mx-auto py-8">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-sky-100 space-y-6">
+                <div class="text-center space-y-1">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                        <i class="fa-solid fa-address-card"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Identificación de Estudiante</h3>
+                    <p class="text-xs text-slate-500">Ingresa tus datos reales. No se permite duplicar nombres y apellidos en el sistema.</p>
+                </div>
+
+                <form id="registerForm" onsubmit="submitRegistration(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nombre</label>
+                        <input type="text" id="regNombre" required placeholder="Ej. Pablo" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none text-sm transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Apellido</label>
+                        <input type="text" id="regApellido" required placeholder="Ej. Hernández" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none text-sm transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sección</label>
+                        <select id="regSeccion" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none text-sm bg-white transition">
+                            <option value="" disabled selected>Selecciona tu sección</option>
+                            <option value="A">Sección A</option>
+                            <option value="B">Sección B</option>
+                            <option value="C">Sección C</option>
+                            <option value="D">Sección D</option>
+                            <option value="E">Sección E</option>
+                            <option value="F">Sección F</option>
+                        </select>
+                    </div>
+
+                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start space-x-2 text-xs text-amber-800">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                        <span>Protección Antifraude: Este teléfono o computadora quedará vinculado permanentemente a tu estudiante. No se permitirá crear otra cuenta desde este equipo.</span>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition">
+                        Ingresar a la Votación
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. PANEL DE VOTACIÓN (PROMO XXXV) -->
+        <section id="viewVoting" class="hidden space-y-8 py-4">
+            
+            <!-- Portada / Header Encuesta -->
+            <div class="bg-gradient-to-r from-sky-600 to-sky-800 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl font-black">
+                    <i class="fa-solid fa-shirt"></i>
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-2 text-center md:text-left">
+                        <span class="bg-sky-400/30 text-sky-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-sky-300/30">Debate Oficial</span>
+                        <h2 class="text-xl md:text-3xl font-extrabold leading-tight">
+                            VOTACIONES DE ELIO VALMORES CASTELLANO<br>
+                            <span class="text-sky-200">AQUÍ DEBATIRÁN QUÉ PREFIEREN ESTA PROMO XXXV</span>
+                        </h2>
+                        <p class="text-sky-100 text-xs md:text-sm">Elige entre la Chaqueta o el Chemis. Puedes cambiar tu opinión libremente mientras la votación siga abierta.</p>
+                    </div>
+                    <!-- Logo Escolar en la Esquina -->
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl flex-shrink-0 flex items-center justify-center p-2 shadow-lg border-2 border-sky-300">
+                        <i class="fa-solid fa-school text-sky-600 text-4xl md:text-5xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Estado de Votación Pausada -->
+            <div id="pausedBanner" class="hidden p-4 bg-amber-500 text-white rounded-2xl shadow-md font-bold text-center flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-circle-pause text-xl"></i>
+                <span>LAS VOTACIONES HAN SIDO PAUSADAS TEMPORALMENTE POR LA ADMINISTRACIÓN</span>
+            </div>
+
+            <!-- Contadores Rápidos y Estadísticas de Votos -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-sm text-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Total Votos Chaqueta</span>
+                    <div class="text-2xl md:text-3xl font-black text-sky-600 mt-1" id="statVotesChaqueta">0</div>
+                    <div class="text-xs font-semibold text-slate-400 mt-1" id="statPercentChaqueta">0%</div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-sky-100 shadow-sm text-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Total Votos Chemis</span>
+                    <div class="text-2xl md:text-3xl font-black text-emerald-600 mt-1" id="statVotesChemis">0</div>
+                    <div class="text-xs font-semibold text-slate-400 mt-1" id="statPercentChemis">0%</div>
+                </div>
+            </div>
+
+            <!-- OPCIONES DE VOTACIÓN: CHAQUETA VS CHEMIS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- OPCIÓN 1: CHAQUETA -->
+                <div id="cardChaqueta" class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-100 hover:border-sky-300 transition flex flex-col justify-between space-y-4 relative overflow-hidden">
+                    <div class="space-y-4">
+                        <!-- Placeholder/Foto Chaqueta -->
+                        <div class="w-full h-48 bg-slate-100 rounded-2xl overflow-hidden relative group flex items-center justify-center border border-slate-200">
+                            <img id="imgChaqueta" src="https://placehold.co/600x400/0284c7/ffffff?text=Chaqueta+Promo+XXXV" alt="Chaqueta Promo" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition"></div>
+                            <span class="absolute top-3 left-3 bg-sky-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Opción A</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-2xl font-extrabold text-slate-800">Chaqueta Promo</h3>
+                            <span id="badgeYourVoteChaqueta" class="hidden bg-sky-100 text-sky-700 font-bold text-xs px-3 py-1 rounded-full border border-sky-300">
+                                <i class="fa-solid fa-check mr-1"></i> Tu Selección
+                            </span>
+                        </div>
+
+                        <!-- Párrafo Informativo / Argumentos (Exactamente 5 líneas informativas) -->
+                        <div class="bg-sky-50/60 p-4 rounded-2xl border border-sky-100 text-xs md:text-sm text-slate-700 leading-relaxed">
+                            La chaqueta promocional brinda un aspecto mucho más elegante y distintivo para destacar con presencia en cada actividad institucional del liceo. Ofrece una durabilidad superior durante todo el año escolar, protegiendo contra el clima cambiante con abrigo y comodidad. Su diseño acolchado permite bordar con mayor detalle los logos conmemorativos, nombres e insignias especiales de la Promo XXXV. Además, se conserva impecable con el paso de los años como un recuerdo físico duradero e icónico para toda la vida. Representa la imagen clásica, sobria y de verdadero impacto representativo que todo graduando sueña luciendo con orgullo.
+                        </div>
+                    </div>
+
+                    <button id="btnVoteChaqueta" onclick="vote('Chaqueta')" class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-thumbs-up"></i>
+                        <span>Votar por Chaqueta</span>
+                    </button>
+                </div>
+
+                <!-- OPCIÓN 2: CHEMIS -->
+                <div id="cardChemis" class="bg-white rounded-3xl p-6 shadow-md border-2 border-slate-100 hover:border-emerald-300 transition flex flex-col justify-between space-y-4 relative overflow-hidden">
+                    <div class="space-y-4">
+                        <!-- Placeholder/Foto Chemis -->
+                        <div class="w-full h-48 bg-slate-100 rounded-2xl overflow-hidden relative group flex items-center justify-center border border-slate-200">
+                            <img id="imgChemis" src="https://placehold.co/600x400/059669/ffffff?text=Chemis+Promo+XXXV" alt="Chemis Promo" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition"></div>
+                            <span class="absolute top-3 left-3 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Opción B</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-2xl font-extrabold text-slate-800">Chemise Promo</h3>
+                            <span id="badgeYourVoteChemis" class="hidden bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full border border-emerald-300">
+                                <i class="fa-solid fa-check mr-1"></i> Tu Selección
+                            </span>
+                        </div>
+
+                        <!-- Párrafo Informativo / Argumentos (Exactamente 5 líneas informativas) -->
+                        <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 text-xs md:text-sm text-slate-700 leading-relaxed">
+                            La chemise es una prenda fresca, ligera y sumamente cómoda, perfecta para adaptarse al clima cálido cotidiano en las aulas del liceo. Facilita una movilidad total y libertad en el día a día sin causar sofoco térmico durante las jornadas de clases e intercursos. Su costo de confección suele ser más accesible para el presupuesto de todas las familias, facilitando la adquisición uniforme. Permite lucir un estilo deportivo, moderno y juvenil con cuello tejido y bordados impecables que lucen siempre geniales. Es la alternativa ideal, práctica y versátil para usar rutinariamente en cada evento de nuestra inolvidable graduación.
+                        </div>
+                    </div>
+
+                    <button id="btnVoteChemis" onclick="vote('Chemis')" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-thumbs-up"></i>
+                        <span>Votar por Chemise</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Módulo Opcional de Comentario tras votar -->
+            <div id="commentBoxSection" class="hidden bg-white p-6 rounded-3xl border border-sky-100 shadow-sm space-y-3">
+                <h4 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-comment-dots text-sky-600"></i>
+                    <span>¿Por qué elegiste esta opción? (Comentario de votación)</span>
+                </h4>
+                <div class="flex gap-2">
+                    <input type="text" id="voteCommentInput" placeholder="Escribe brevemente tu razón..." class="flex-grow px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    <button onclick="saveVoteComment()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm rounded-xl transition">Guardar</button>
+                </div>
+                <p id="currentCommentDisplay" class="text-xs text-slate-500 italic mt-1"></p>
+            </div>
+
+            <!-- NUBE DE CHAT / DEBATE EN VIVO -->
+            <div class="bg-white rounded-3xl p-6 shadow-md border border-sky-100 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <h3 class="font-bold text-slate-800 text-base">Nube de Chat / Debate en Vivo</h3>
+                    </div>
+                    <span id="chatStatusBadge" class="text-xs px-2.5 py-1 rounded-full font-semibold bg-emerald-100 text-emerald-700">Chat Activo</span>
+                </div>
+
+                <!-- Mensajes del Chat -->
+                <div id="chatMessages" class="h-64 overflow-y-auto space-y-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <!-- Los mensajes se cargan dinámicamente -->
+                </div>
+
+                <!-- Input de Enviar Mensaje -->
+                <form id="chatForm" onsubmit="sendChatMessage(event)" class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Escribe un mensaje para debatir..." class="flex-grow px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                    <button type="submit" id="btnSendChat" class="px-5 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow transition flex items-center space-x-1">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- BOTÓN CONTINUAR (Deshabilitado temporalmente) -->
+            <div class="pt-4 pb-8 text-center">
+                <button disabled class="w-full md:w-auto px-10 py-4 bg-slate-300 text-slate-500 font-bold rounded-2xl cursor-not-allowed shadow-none flex items-center justify-center space-x-2 mx-auto">
+                    <span>Continuar</span>
+                    <i class="fa-solid fa-lock text-xs"></i>
+                </button>
+                <p class="text-xs text-slate-400 mt-2">Esta opción no se encuentra habilitada por el momento.</p>
+            </div>
+
+        </section>
+
+        <!-- 4. MODAL AUTH ADMINISTRADOR -->
+        <div id="adminAuthModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl space-y-5">
+                <div class="text-center space-y-1">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Acceso de Administrador</h3>
+                    <p class="text-xs text-slate-500">Introduce la clave de acceso para continuar.</p>
+                </div>
+
+                <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
+                    <div>
+                        <input type="password" id="adminPasswordInput" placeholder="Contraseña requerida" class="w-full px-4 py-3 text-center tracking-widest text-lg rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeAdminAuthModal()" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">Cancelar</button>
+                        <button type="submit" class="w-1/2 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow transition">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 5. PANEL DE ADMINISTRACIÓN -->
+        <section id="viewAdmin" class="hidden space-y-6 py-4">
+            <div class="flex items-center justify-between bg-white p-6 rounded-3xl border border-sky-100 shadow-sm">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-800">Panel de Control Administrativo</h2>
+                    <p class="text-xs text-slate-500">Gestión de votación, moderación de usuarios y control en tiempo real.</p>
+                </div>
+                <button onclick="logoutAdmin()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                    Salir Admin
+                </button>
+            </div>
+
+            <!-- Tarjetas de Control Global -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Pausar/Reanudar Votación -->
+                <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-sm flex flex-col justify-between space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-power-off"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800">Estado Votación</h4>
+                            <span id="adminVoteStatusText" class="text-xs text-emerald-600 font-semibold">Abierta</span>
+                        </div>
+                    </div>
+                    <button id="btnToggleVoting" onclick="toggleVotingStatus()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl transition">
+                        Pausar Votaciones
+                    </button>
+                </div>
+
+                <!-- Silenciar/Activar Chat -->
+                <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-sm flex flex-col justify-between space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-comment-slash"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800">Estado del Chat</h4>
+                            <span id="adminChatStatusText" class="text-xs text-emerald-600 font-semibold">Activo</span>
+                        </div>
+                    </div>
+                    <button id="btnToggleChat" onclick="toggleChatStatus()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl transition">
+                        Silenciar Chat
+                    </button>
+                </div>
+
+                <!-- Estadísticas Conteo Exacto -->
+                <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-sm flex flex-col justify-center space-y-2 text-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Participación Total</span>
+                    <div class="text-3xl font-black text-sky-600" id="adminTotalVotersCount">0</div>
+                    <div class="text-xs text-slate-400">Estudiantes registrados acumulados</div>
+                </div>
+            </div>
+
+            <!-- Herramientas de Mantenimiento de Sistema Antifraude -->
+            <div class="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                    <span>Control Antifraude y Reinicio de Dispositivos</span>
+                </h3>
+                <p class="text-xs text-slate-500">Si un estudiante cambió de dispositivo o cometió un error al registrarse, puedes resetear los bloqueos de dispositivos o reiniciar las votaciones completas.</p>
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button onclick="clearAllDeviceBindings()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition flex items-center space-x-2">
+                        <i class="fa-solid fa-unlock"></i>
+                        <span>Desbloquear Todos los Dispositivos</span>
+                    </button>
+                    <button onclick="resetAllVotes()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition flex items-center space-x-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reiniciar Todas las Votaciones</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Registro y Votos Filtrable -->
+            <div class="bg-white rounded-3xl p-6 border border-sky-100 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-sky-600"></i>
+                        <span>Lista de Estudiantes y Votos</span>
+                    </h3>
+
+                    <!-- Filtro por Sección -->
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs font-bold text-slate-600">Sección:</label>
+                        <select id="adminSectionFilter" onchange="renderAdminVoterList()" class="px-3 py-1.5 border border-slate-200 rounded-xl text-xs bg-white focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="ALL">Todas las Secciones</option>
+                            <option value="A">Sección A</option>
+                            <option value="B">Sección B</option>
+                            <option value="C">Sección C</option>
+                            <option value="D">Sección D</option>
+                            <option value="E">Sección E</option>
+                            <option value="F">Sección F</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabla Responsive -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                                <th class="py-3 px-4 font-bold">Estudiante</th>
+                                <th class="py-3 px-4 font-bold text-center">Sección</th>
+                                <th class="py-3 px-4 font-bold text-center">Voto</th>
+                                <th class="py-3 px-4 font-bold">Comentario / Razón</th>
+                                <th class="py-3 px-4 font-bold text-center">ID Dispositivo</th>
+                                <th class="py-3 px-4 font-bold text-center">Acciones Moderación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminVoterTableBody" class="divide-y divide-slate-100">
+                            <!-- Se renderiza dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-sky-100 py-4 text-center text-xs text-slate-500 space-y-1">
+        <p class="font-semibold text-slate-700">Liceo "Elio Valmores Castellano" &copy; Promo XXXV</p>
+        <p class="text-sky-700 font-bold flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-code text-xs"></i>
+            <span>Plataforma Oficial de Votaciones Creada por Hearry Silva</span>
+        </p>
+    </footer>
+
+    <!-- LÓGICA DE LA APLICACIÓN -->
+    <script>
+        // --- CONSTANTES Y SEGURIDAD ---
+        const ADMIN_PIN = "38759";
+
+        // Prevenir inyección de código / Sanitizar strings
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function (m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        // --- GENERADOR DE HUELLA DIGITAL ÚNICA DE DISPOSITIVO (ANTISABOTAJE) ---
+        function getDeviceFingerprint() {
+            let fp = localStorage.getItem('evc_device_fingerprint');
+            if (!fp) {
+                // Crear huella única resistente basada en aleatoriedad y fecha
+                fp = 'DEV_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+                localStorage.setItem('evc_device_fingerprint', fp);
+            }
+            return fp;
+        }
+
+        const currentDeviceFP = getDeviceFingerprint();
+
+        // --- MANEJO DE ALMACENAMIENTO LOCAL (PERSISTENCIA) ---
+        function getStoredData(key, fallback) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function setStoredData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error("Error guardando en localStorage", e);
+            }
+        }
+
+        // Estado Global Inicial
+        let users = getStoredData('evc_users', []); 
+        // User struct: { id, nombre, apellido, fullNameKey, seccion, vote: null|'Chaqueta'|'Chemis', comment: '', deviceFingerprint: '' }
+
+        let currentUser = getStoredData('evc_current_user', null);
+
+        let chatMessages = getStoredData('evc_chat', [
+            { id: 1, sender: "Comité Promo XXXV", text: "¡Bienvenidos al debate oficial de la Promo XXXV!", time: "08:00 AM", isSystem: true }
+        ]);
+
+        let appSettings = getStoredData('evc_settings', {
+            votingActive: true,
+            chatActive: true
+        });
+
+        // --- CONTROL DE NAVEGACIÓN DE VISTAS ---
+        function showView(viewName) {
+            document.getElementById('viewHome').classList.add('hidden');
+            document.getElementById('viewRegister').classList.add('hidden');
+            document.getElementById('viewVoting').classList.add('hidden');
+            document.getElementById('viewAdmin').classList.add('hidden');
+
+            if (viewName === 'home') {
+                document.getElementById('viewHome').classList.remove('hidden');
+                checkDeviceBindingOnHome();
+            } else if (viewName === 'register') {
+                document.getElementById('viewRegister').classList.remove('hidden');
+            } else if (viewName === 'voting') {
+                document.getElementById('viewVoting').classList.remove('hidden');
+                updateVotingUI();
+                renderChatMessages();
+            } else if (viewName === 'admin') {
+                document.getElementById('viewAdmin').classList.remove('hidden');
+                renderAdminDashboard();
+            }
+
+            updateUserBadge();
+        }
+
+        // Verifica si el dispositivo físico actual ya tiene un estudiante registrado
+        function checkDeviceBindingOnHome() {
+            const boundNotice = document.getElementById('deviceBoundNotice');
+            const boundText = document.getElementById('deviceBoundUserText');
+
+            const boundUser = users.find(u => u.deviceFingerprint === currentDeviceFP);
+
+            if (boundUser) {
+                boundText.textContent = `Equipo vinculado a: ${boundUser.nombre} ${boundUser.apellido} (${boundUser.seccion}).`;
+                boundNotice.classList.remove('hidden');
+            } else {
+                boundNotice.classList.add('hidden');
+            }
+        }
+
+        // --- MANEJO DE USUARIO BADGE Y SESIÓN ---
+        function updateUserBadge() {
+            const badge = document.getElementById('userBadge');
+            const badgeName = document.getElementById('badgeUserName');
+
+            if (currentUser) {
+                badgeName.textContent = `${currentUser.nombre} ${currentUser.apellido} (${currentUser.seccion})`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('evc_current_user');
+            showModal("Sesión Cerrada", "Has salido de tu cuenta escolar. Tu dispositivo sigue vinculado a tu cuenta registrada.");
+            showView('home');
+        }
+
+        // --- BOTÓN PRINCIPAL "VOTAR" CON VERIFICACIÓN ANTISABOTAJE DE DISPOSITIVO ---
+        function handleVotarClick() {
+            // 1. Si hay una sesión activa, cargar usuario
+            if (currentUser) {
+                const freshUser = users.find(u => u.id === currentUser.id);
+                if (freshUser) {
+                    currentUser = freshUser;
+                    setStoredData('evc_current_user', currentUser);
+                    showView('voting');
+                    return;
+                } else {
+                    currentUser = null;
+                    localStorage.removeItem('evc_current_user');
+                }
+            }
+
+            // 2. Si se cerró sesión pero el dispositivo YA ESTÁ VINCULADO a una cuenta
+            const boundUser = users.find(u => u.deviceFingerprint === currentDeviceFP);
+            if (boundUser) {
+                // Restaurar automáticamente la cuenta del dispositivo para evitar crear otra
+                currentUser = boundUser;
+                setStoredData('evc_current_user', currentUser);
+                showModal("Acceso Restablecido", `Bienvenido de nuevo ${boundUser.nombre}. Se ha iniciado sesión con la cuenta vinculada a este equipo.`);
+                showView('voting');
+                return;
+            }
+
+            // 3. Dispositivo limpio sin cuenta registrada previamente -> Ir al registro
+            showView('register');
+        }
+
+        // --- REGISTRO STRICTO Y VINCULACIÓN DE DISPOSITIVO ---
+        function submitRegistration(e) {
+            e.preventDefault();
+
+            // Bloqueo directo de dispositivo si ya existe una cuenta vinculada a este equipo
+            const existingDeviceUser = users.find(u => u.deviceFingerprint === currentDeviceFP);
+            if (existingDeviceUser) {
+                showModal("Dispositivo Ya Registrado", `Este equipo ya registró al estudiante "${existingDeviceUser.nombre} ${existingDeviceUser.apellido}". No es posible registrar múltiples cuentas desde la misma computadora o teléfono.`);
+                
+                currentUser = existingDeviceUser;
+                setStoredData('evc_current_user', currentUser);
+                showView('voting');
+                return;
+            }
+
+            const rawNombre = document.getElementById('regNombre').value.trim();
+            const rawApellido = document.getElementById('regApellido').value.trim();
+            const seccion = document.getElementById('regSeccion').value;
+
+            if (!rawNombre || !rawApellido || !seccion) {
+                showModal("Campos Incompletos", "Por favor completa tu Nombre, Apellido y Sección.");
+                return;
+            }
+
+            // Sanitizado
+            const nombre = sanitizeHTML(rawNombre);
+            const apellido = sanitizeHTML(rawApellido);
+            
+            // Clave única de Nombre + Apellido limpia de espacios extra
+            const cleanNombreKey = nombre.toLowerCase().replace(/\s+/g, ' ');
+            const cleanApellidoKey = apellido.toLowerCase().replace(/\s+/g, ' ');
+            const fullNameKey = `${cleanNombreKey} ${cleanApellidoKey}`;
+
+            // Validación estricta 1: Nombre + Apellido Duplicado en el liceo
+            const duplicateName = users.find(u => u.fullNameKey === fullNameKey);
+            if (duplicateName) {
+                showModal("Estudiante Ya Registrado", `El nombre "${nombre} ${apellido}" ya existe en las listas de la votación. Si eres este estudiante, ingresa desde el dispositivo desde el que te registraste.`);
+                return;
+            }
+
+            // Crear nuevo usuario con vinculación de huella de dispositivo
+            const newUser = {
+                id: 'usr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                nombre: nombre,
+                apellido: apellido,
+                fullNameKey: fullNameKey,
+                seccion: seccion,
+                vote: null,
+                comment: '',
+                deviceFingerprint: currentDeviceFP
+            };
+
+            users.push(newUser);
+            setStoredData('evc_users', users);
+
+            // Iniciar sesión y guardar persistencia
+            currentUser = newUser;
+            setStoredData('evc_current_user', currentUser);
+
+            showModal("¡Registro Completado!", `Bienvenido ${nombre} ${apellido} (${seccion}). Este dispositivo ha sido vinculado correctamente a tu usuario.`);
+            showView('voting');
+        }
+
+        // --- PROCESO DE VOTACIÓN ---
+        function vote(option) {
+            if (!appSettings.votingActive) {
+                showModal("Votación Pausada", "Las votaciones se encuentran cerradas temporalmente por la administración.");
+                return;
+            }
+
+            if (!currentUser) {
+                showModal("Error", "Debes estar registrado para poder votar.");
+                showView('register');
+                return;
+            }
+
+            // Actualizar usuario en lista
+            const userIdx = users.findIndex(u => u.id === currentUser.id);
+            if (userIdx !== -1) {
+                users[userIdx].vote = option;
+                currentUser.vote = option;
+
+                setStoredData('evc_users', users);
+                setStoredData('evc_current_user', currentUser);
+
+                // Mostrar sección de comentario opcional
+                document.getElementById('commentBoxSection').classList.remove('hidden');
+
+                showModal("¡Voto Registrado!", `Has elegido la opción: ${option}. Puedes cambiar de opinión en cualquier momento si lo deseas.`);
+                updateVotingUI();
+            }
+        }
+
+        function saveVoteComment() {
+            const rawComment = document.getElementById('voteCommentInput').value.trim();
+            if (!rawComment) return;
+
+            const sanitizedComment = sanitizeHTML(rawComment);
+
+            const userIdx = users.findIndex(u => u.id === currentUser.id);
+            if (userIdx !== -1) {
+                users[userIdx].comment = sanitizedComment;
+                currentUser.comment = sanitizedComment;
+
+                setStoredData('evc_users', users);
+                setStoredData('evc_current_user', currentUser);
+
+                document.getElementById('currentCommentDisplay').textContent = `Tu razón guardada: "${sanitizedComment}"`;
+                showModal("Comentario Guardado", "Gracias por aportar tu motivo al debate.");
+            }
+        }
+
+        // ACTUALIZACIÓN DE UI DE VOTACIÓN Y CONTEO
+        function updateVotingUI() {
+            // Contadores Exactos
+            let countChaqueta = 0;
+            let countChemis = 0;
+
+            users.forEach(u => {
+                if (u.vote === 'Chaqueta') countChaqueta++;
+                if (u.vote === 'Chemis') countChemis++;
+            });
+
+            const totalVotes = countChaqueta + countChemis;
+
+            document.getElementById('statVotesChaqueta').textContent = countChaqueta;
+            document.getElementById('statVotesChemis').textContent = countChemis;
+
+            const percChaqueta = totalVotes > 0 ? Math.round((countChaqueta / totalVotes) * 100) : 0;
+            const percChemis = totalVotes > 0 ? Math.round((countChemis / totalVotes) * 100) : 0;
+
+            document.getElementById('statPercentChaqueta').textContent = `${percChaqueta}% del total`;
+            document.getElementById('statPercentChemis').textContent = `${percChemis}% del total`;
+
+            // Resaltar elección del usuario
+            const cardChaqueta = document.getElementById('cardChaqueta');
+            const cardChemis = document.getElementById('cardChemis');
+            const badgeChaqueta = document.getElementById('badgeYourVoteChaqueta');
+            const badgeChemis = document.getElementById('badgeYourVoteChemis');
+
+            if (currentUser && currentUser.vote === 'Chaqueta') {
+                cardChaqueta.classList.add('border-sky-500', 'bg-sky-50/20');
+                cardChemis.classList.remove('border-emerald-500', 'bg-emerald-50/20');
+                badgeChaqueta.classList.remove('hidden');
+                badgeChemis.classList.add('hidden');
+            } else if (currentUser && currentUser.vote === 'Chemis') {
+                cardChemis.classList.add('border-emerald-500', 'bg-emerald-50/20');
+                cardChaqueta.classList.remove('border-sky-500', 'bg-sky-50/20');
+                badgeChemis.classList.remove('hidden');
+                badgeChaqueta.classList.add('hidden');
+            } else {
+                cardChaqueta.classList.remove('border-sky-500', 'bg-sky-50/20');
+                cardChemis.classList.remove('border-emerald-500', 'bg-emerald-50/20');
+                badgeChaqueta.classList.add('hidden');
+                badgeChemis.classList.add('hidden');
+            }
+
+            // Banner Pausado
+            const pausedBanner = document.getElementById('pausedBanner');
+            if (!appSettings.votingActive) {
+                pausedBanner.classList.remove('hidden');
+            } else {
+                pausedBanner.classList.add('hidden');
+            }
+
+            // Comentario guardado previo
+            if (currentUser && currentUser.vote) {
+                document.getElementById('commentBoxSection').classList.remove('hidden');
+                if (currentUser.comment) {
+                    document.getElementById('currentCommentDisplay').textContent = `Tu razón guardada: "${currentUser.comment}"`;
+                }
+            } else {
+                document.getElementById('commentBoxSection').classList.add('hidden');
+            }
+        }
+
+        // --- CHAT DE DEBATE EN VIVO ---
+        function renderChatMessages() {
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = '';
+
+            chatMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = msg.isSystem ? 'text-center py-1' : 'bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-1';
+
+                if (msg.isSystem) {
+                    msgDiv.innerHTML = `<span class="bg-sky-100 text-sky-800 text-xs px-3 py-1 rounded-full font-medium">${sanitizeHTML(msg.text)}</span>`;
+                } else {
+                    msgDiv.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-xs text-sky-700">${sanitizeHTML(msg.sender)}</span>
+                            <span class="text-[10px] text-slate-400">${sanitizeHTML(msg.time)}</span>
+                        </div>
+                        <p class="text-xs text-slate-700 break-words">${sanitizeHTML(msg.text)}</p>
+                    `;
+                }
+
+                chatContainer.appendChild(msgDiv);
+            });
+
+            // Auto-scroll abajo
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Estado del chat
+            const chatStatusBadge = document.getElementById('chatStatusBadge');
+            const btnSendChat = document.getElementById('btnSendChat');
+            const chatInput = document.getElementById('chatInput');
+
+            if (!appSettings.chatActive) {
+                chatStatusBadge.textContent = 'Chat Silenciado';
+                chatStatusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-rose-100 text-rose-700';
+                chatInput.disabled = true;
+                chatInput.placeholder = 'El chat ha sido deshabilitado temporalmente...';
+                btnSendChat.disabled = true;
+                btnSendChat.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                chatStatusBadge.textContent = 'Chat Activo';
+                chatStatusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-emerald-100 text-emerald-700';
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Escribe un mensaje para debatir...';
+                btnSendChat.disabled = false;
+                btnSendChat.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function sendChatMessage(e) {
+            e.preventDefault();
+
+            if (!appSettings.chatActive) {
+                showModal("Chat Silenciado", "La administración ha desactivado el chat temporalmente.");
+                return;
+            }
+
+            if (!currentUser) {
+                showModal("Inicia Sesión", "Debes identificarte antes de escribir en el chat.");
+                return;
+            }
+
+            const input = document.getElementById('chatInput');
+            const rawText = input.value.trim();
+
+            if (!rawText) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newMsg = {
+                id: Date.now(),
+                sender: `${currentUser.nombre} ${currentUser.apellido} (${currentUser.seccion})`,
+                text: sanitizeHTML(rawText),
+                time: timeStr,
+                isSystem: false
+            };
+
+            chatMessages.push(newMsg);
+            setStoredData('evc_chat', chatMessages);
+
+            input.value = '';
+            renderChatMessages();
+        }
+
+        // --- MÓDULO DE ADMINISTRACIÓN (PIN 38759) ---
+        function openAdminAuthModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const pin = document.getElementById('adminPasswordInput').value;
+
+            if (pin === ADMIN_PIN) {
+                closeAdminAuthModal();
+                showView('admin');
+            } else {
+                showModal("Contraseña Incorrecta", "La clave de acceso ingresada es incorrecta.");
+            }
+        }
+
+        function logoutAdmin() {
+            showView('home');
+        }
+
+        function renderAdminDashboard() {
+            // Actualizar textos de botones
+            const statusText = document.getElementById('adminVoteStatusText');
+            const btnToggleVoting = document.getElementById('btnToggleVoting');
+
+            if (appSettings.votingActive) {
+                statusText.textContent = "Abierta";
+                statusText.className = "text-xs text-emerald-600 font-semibold";
+                btnToggleVoting.textContent = "Pausar Votaciones";
+                btnToggleVoting.className = "w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl transition";
+            } else {
+                statusText.textContent = "Pausada";
+                statusText.className = "text-xs text-rose-600 font-semibold";
+                btnToggleVoting.textContent = "Reabrir Votaciones";
+                btnToggleVoting.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition";
+            }
+
+            const chatStatusText = document.getElementById('adminChatStatusText');
+            const btnToggleChat = document.getElementById('btnToggleChat');
+
+            if (appSettings.chatActive) {
+                chatStatusText.textContent = "Activo";
+                chatStatusText.className = "text-xs text-emerald-600 font-semibold";
+                btnToggleChat.textContent = "Silenciar Chat";
+                btnToggleChat.className = "w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl transition";
+            } else {
+                chatStatusText.textContent = "Silenciado";
+                chatStatusText.className = "text-xs text-rose-600 font-semibold";
+                btnToggleChat.textContent = "Activar Chat";
+                btnToggleChat.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition";
+            }
+
+            document.getElementById('adminTotalVotersCount').textContent = users.length;
+
+            renderAdminVoterList();
+        }
+
+        function toggleVotingStatus() {
+            appSettings.votingActive = !appSettings.votingActive;
+            setStoredData('evc_settings', appSettings);
+            renderAdminDashboard();
+            showModal("Ajuste Actualizado", appSettings.votingActive ? "Las votaciones se han reabierto." : "Las votaciones se han pausado.");
+        }
+
+        function toggleChatStatus() {
+            appSettings.chatActive = !appSettings.chatActive;
+            setStoredData('evc_settings', appSettings);
+            renderAdminDashboard();
+            showModal("Chat Actualizado", appSettings.chatActive ? "El chat de debate ha sido activado." : "El chat de debate ha sido silenciado.");
+        }
+
+        function clearAllDeviceBindings() {
+            users.forEach(u => {
+                u.deviceFingerprint = 'RESET_BY_ADMIN';
+            });
+            setStoredData('evc_users', users);
+            localStorage.removeItem('evc_device_fingerprint');
+            showModal("Dispositivos Desbloqueados", "Se han liberado todas las vinculaciones de dispositivos. Los estudiantes pueden volver a vincular sus equipos.");
+            renderAdminDashboard();
+        }
+
+        function resetAllVotes() {
+            users.forEach(u => {
+                u.vote = null;
+                u.comment = '';
+            });
+            setStoredData('evc_users', users);
+            if (currentUser) {
+                currentUser.vote = null;
+                currentUser.comment = '';
+                setStoredData('evc_current_user', currentUser);
+            }
+            showModal("Votación Reiniciada", "Se han puesto a cero todos los votos y comentarios.");
+            renderAdminDashboard();
+        }
+
+        function renderAdminVoterList() {
+            const tbody = document.getElementById('adminVoterTableBody');
+            tbody.innerHTML = '';
+
+            const sectionFilter = document.getElementById('adminSectionFilter').value;
+
+            let filtered = users;
+            if (sectionFilter !== 'ALL') {
+                filtered = users.filter(u => u.seccion === sectionFilter);
+            }
+
+            // Ordenar alfabéticamente por Nombre
+            filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No hay estudiantes registrados en esta sección.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                let voteBadge = '<span class="text-slate-400 italic">Sin Votar</span>';
+                if (u.vote === 'Chaqueta') {
+                    voteBadge = '<span class="bg-sky-100 text-sky-800 font-bold px-2.5 py-1 rounded-full text-[11px]">Chaqueta</span>';
+                } else if (u.vote === 'Chemis') {
+                    voteBadge = '<span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full text-[11px]">Chemise</span>';
+                }
+
+                const fpShort = u.deviceFingerprint ? u.deviceFingerprint.substring(0, 12) + '...' : 'N/A';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-800">${sanitizeHTML(u.nombre)} ${sanitizeHTML(u.apellido)}</td>
+                    <td class="py-3 px-4 text-center font-semibold text-slate-600">${u.seccion}</td>
+                    <td class="py-3 px-4 text-center">${voteBadge}</td>
+                    <td class="py-3 px-4 text-slate-600 italic max-w-xs truncate">${u.comment ? sanitizeHTML(u.comment) : '-'}</td>
+                    <td class="py-3 px-4 text-center font-mono text-[10px] text-slate-400">${fpShort}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="deleteUserByAdmin('${u.id}')" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-trash mr-1"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteUserByAdmin(userId) {
+            const targetUser = users.find(u => u.id === userId);
+            if (!targetUser) return;
+
+            // Eliminar usuario
+            users = users.filter(u => u.id !== userId);
+            setStoredData('evc_users', users);
+
+            // Si el usuario borrado es el actual logueado
+            if (currentUser && currentUser.id === userId) {
+                currentUser = null;
+                localStorage.removeItem('evc_current_user');
+            }
+
+            showModal("Moderación", `El registro de "${targetUser.nombre} ${targetUser.apellido}" ha sido eliminado con éxito.`);
+            renderAdminDashboard();
+        }
+
+        // --- SISTEMA DE MODAL PERSONALIZADO ---
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // INIT ON LOAD
+        window.onload = function() {
+            updateUserBadge();
+            showView('home');
+        };
+    </script>
+</body>
+</html>
