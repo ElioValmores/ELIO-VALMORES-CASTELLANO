@@ -594,4 +594,497 @@
             const badgeName = document.getElementById('badgeUserName');
 
             if (currentUser) {
-                badgeName.textContent = `${currentUser.nombre} ${currentUser.apellido} (${currentUser.seccion})
+                badgeName.textContent = `${currentUser.nombre} ${currentUser.apellido} (${currentUser.seccion})`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem('evc_current_user');
+            showModal("Sesión Cerrada", "Has salido de tu cuenta escolar. Tu dispositivo sigue vinculado a tu cuenta registrada.");
+            showView('home');
+        }
+
+        // --- BOTÓN PRINCIPAL "VOTAR" CON VERIFICACIÓN ANTISABOTAJE DE DISPOSITIVO ---
+        function handleVotarClick() {
+            // 1. Si hay una sesión activa, cargar usuario
+            if (currentUser) {
+                const freshUser = users.find(u => u.id === currentUser.id);
+                if (freshUser) {
+                    currentUser = freshUser;
+                    setStoredData('evc_current_user', currentUser);
+                    showView('voting');
+                    return;
+                } else {
+                    currentUser = null;
+                    localStorage.removeItem('evc_current_user');
+                }
+            }
+
+            // 2. Si se cerró sesión pero el dispositivo YA ESTÁ VINCULADO a una cuenta
+            const boundUser = users.find(u => u.deviceFingerprint === currentDeviceFP);
+            if (boundUser) {
+                // Restaurar automáticamente la cuenta del dispositivo para evitar crear otra
+                currentUser = boundUser;
+                setStoredData('evc_current_user', currentUser);
+                showModal("Acceso Restablecido", `Bienvenido de nuevo ${boundUser.nombre}. Se ha iniciado sesión con la cuenta vinculada a este equipo.`);
+                showView('voting');
+                return;
+            }
+
+            // 3. Dispositivo limpio sin cuenta registrada previamente -> Ir al registro
+            showView('register');
+        }
+
+        // --- REGISTRO STRICTO Y VINCULACIÓN DE DISPOSITIVO ---
+        function submitRegistration(e) {
+            e.preventDefault();
+
+            // Bloqueo directo de dispositivo si ya existe una cuenta vinculada a este equipo
+            const existingDeviceUser = users.find(u => u.deviceFingerprint === currentDeviceFP);
+            if (existingDeviceUser) {
+                showModal("Dispositivo Ya Registrado", `Este equipo ya registró al estudiante "${existingDeviceUser.nombre} ${existingDeviceUser.apellido}". No es posible registrar múltiples cuentas desde la misma computadora o teléfono.`);
+                
+                currentUser = existingDeviceUser;
+                setStoredData('evc_current_user', currentUser);
+                showView('voting');
+                return;
+            }
+
+            const rawNombre = document.getElementById('regNombre').value.trim();
+            const rawApellido = document.getElementById('regApellido').value.trim();
+            const seccion = document.getElementById('regSeccion').value;
+
+            if (!rawNombre || !rawApellido || !seccion) {
+                showModal("Campos Incompletos", "Por favor completa tu Nombre, Apellido y Sección.");
+                return;
+            }
+
+            // Sanitizado
+            const nombre = sanitizeHTML(rawNombre);
+            const apellido = sanitizeHTML(rawApellido);
+            
+            // Clave única de Nombre + Apellido limpia de espacios extra
+            const cleanNombreKey = nombre.toLowerCase().replace(/\s+/g, ' ');
+            const cleanApellidoKey = apellido.toLowerCase().replace(/\s+/g, ' ');
+            const fullNameKey = `${cleanNombreKey} ${cleanApellidoKey}`;
+
+            // Validación estricta 1: Nombre + Apellido Duplicado en el liceo
+            const duplicateName = users.find(u => u.fullNameKey === fullNameKey);
+            if (duplicateName) {
+                showModal("Estudiante Ya Registrado", `El nombre "${nombre} ${apellido}" ya existe en las listas de la votación. Si eres este estudiante, ingresa desde el dispositivo desde el que te registraste.`);
+                return;
+            }
+
+            // Crear nuevo usuario con vinculación de huella de dispositivo
+            const newUser = {
+                id: 'usr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                nombre: nombre,
+                apellido: apellido,
+                fullNameKey: fullNameKey,
+                seccion: seccion,
+                vote: null,
+                comment: '',
+                deviceFingerprint: currentDeviceFP
+            };
+
+            users.push(newUser);
+            setStoredData('evc_users', users);
+
+            // Iniciar sesión y guardar persistencia
+            currentUser = newUser;
+            setStoredData('evc_current_user', currentUser);
+
+            showModal("¡Registro Completado!", `Bienvenido ${nombre} ${apellido} (${seccion}). Este dispositivo ha sido vinculado correctamente a tu usuario.`);
+            showView('voting');
+        }
+
+        // --- PROCESO DE VOTACIÓN ---
+        function vote(option) {
+            if (!appSettings.votingActive) {
+                showModal("Votación Pausada", "Las votaciones se encuentran cerradas temporalmente por la administración.");
+                return;
+            }
+
+            if (!currentUser) {
+                showModal("Error", "Debes estar registrado para poder votar.");
+                showView('register');
+                return;
+            }
+
+            // Actualizar usuario en lista
+            const userIdx = users.findIndex(u => u.id === currentUser.id);
+            if (userIdx !== -1) {
+                users[userIdx].vote = option;
+                currentUser.vote = option;
+
+                setStoredData('evc_users', users);
+                setStoredData('evc_current_user', currentUser);
+
+                // Mostrar sección de comentario opcional
+                document.getElementById('commentBoxSection').classList.remove('hidden');
+
+                showModal("¡Voto Registrado!", `Has elegido la opción: ${option}. Puedes cambiar de opinión en cualquier momento si lo deseas.`);
+                updateVotingUI();
+            }
+        }
+
+        function saveVoteComment() {
+            const rawComment = document.getElementById('voteCommentInput').value.trim();
+            if (!rawComment) return;
+
+            const sanitizedComment = sanitizeHTML(rawComment);
+
+            const userIdx = users.findIndex(u => u.id === currentUser.id);
+            if (userIdx !== -1) {
+                users[userIdx].comment = sanitizedComment;
+                currentUser.comment = sanitizedComment;
+
+                setStoredData('evc_users', users);
+                setStoredData('evc_current_user', currentUser);
+
+                document.getElementById('currentCommentDisplay').textContent = `Tu razón guardada: "${sanitizedComment}"`;
+                showModal("Comentario Guardado", "Gracias por aportar tu motivo al debate.");
+            }
+        }
+
+        // ACTUALIZACIÓN DE UI DE VOTACIÓN Y CONTEO
+        function updateVotingUI() {
+            // Contadores Exactos
+            let countChaqueta = 0;
+            let countChemis = 0;
+
+            users.forEach(u => {
+                if (u.vote === 'Chaqueta') countChaqueta++;
+                if (u.vote === 'Chemis') countChemis++;
+            });
+
+            const totalVotes = countChaqueta + countChemis;
+
+            document.getElementById('statVotesChaqueta').textContent = countChaqueta;
+            document.getElementById('statVotesChemis').textContent = countChemis;
+
+            const percChaqueta = totalVotes > 0 ? Math.round((countChaqueta / totalVotes) * 100) : 0;
+            const percChemis = totalVotes > 0 ? Math.round((countChemis / totalVotes) * 100) : 0;
+
+            document.getElementById('statPercentChaqueta').textContent = `${percChaqueta}% del total`;
+            document.getElementById('statPercentChemis').textContent = `${percChemis}% del total`;
+
+            // Resaltar elección del usuario
+            const cardChaqueta = document.getElementById('cardChaqueta');
+            const cardChemis = document.getElementById('cardChemis');
+            const badgeChaqueta = document.getElementById('badgeYourVoteChaqueta');
+            const badgeChemis = document.getElementById('badgeYourVoteChemis');
+
+            if (currentUser && currentUser.vote === 'Chaqueta') {
+                cardChaqueta.classList.add('border-sky-500', 'bg-sky-50/20');
+                cardChemis.classList.remove('border-emerald-500', 'bg-emerald-50/20');
+                badgeChaqueta.classList.remove('hidden');
+                badgeChemis.classList.add('hidden');
+            } else if (currentUser && currentUser.vote === 'Chemis') {
+                cardChemis.classList.add('border-emerald-500', 'bg-emerald-50/20');
+                cardChaqueta.classList.remove('border-sky-500', 'bg-sky-50/20');
+                badgeChemis.classList.remove('hidden');
+                badgeChaqueta.classList.add('hidden');
+            } else {
+                cardChaqueta.classList.remove('border-sky-500', 'bg-sky-50/20');
+                cardChemis.classList.remove('border-emerald-500', 'bg-emerald-50/20');
+                badgeChaqueta.classList.add('hidden');
+                badgeChemis.classList.add('hidden');
+            }
+
+            // Banner Pausado
+            const pausedBanner = document.getElementById('pausedBanner');
+            if (!appSettings.votingActive) {
+                pausedBanner.classList.remove('hidden');
+            } else {
+                pausedBanner.classList.add('hidden');
+            }
+
+            // Comentario guardado previo
+            if (currentUser && currentUser.vote) {
+                document.getElementById('commentBoxSection').classList.remove('hidden');
+                if (currentUser.comment) {
+                    document.getElementById('currentCommentDisplay').textContent = `Tu razón guardada: "${currentUser.comment}"`;
+                }
+            } else {
+                document.getElementById('commentBoxSection').classList.add('hidden');
+            }
+        }
+
+        // --- CHAT DE DEBATE EN VIVO ---
+        function renderChatMessages() {
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = '';
+
+            chatMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = msg.isSystem ? 'text-center py-1' : 'bg-white p-3 rounded-2xl shadow-sm border border-slate-100 space-y-1';
+
+                if (msg.isSystem) {
+                    msgDiv.innerHTML = `<span class="bg-sky-100 text-sky-800 text-xs px-3 py-1 rounded-full font-medium">${sanitizeHTML(msg.text)}</span>`;
+                } else {
+                    msgDiv.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-xs text-sky-700">${sanitizeHTML(msg.sender)}</span>
+                            <span class="text-[10px] text-slate-400">${sanitizeHTML(msg.time)}</span>
+                        </div>
+                        <p class="text-xs text-slate-700 break-words">${sanitizeHTML(msg.text)}</p>
+                    `;
+                }
+
+                chatContainer.appendChild(msgDiv);
+            });
+
+            // Auto-scroll abajo
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Estado del chat
+            const chatStatusBadge = document.getElementById('chatStatusBadge');
+            const btnSendChat = document.getElementById('btnSendChat');
+            const chatInput = document.getElementById('chatInput');
+
+            if (!appSettings.chatActive) {
+                chatStatusBadge.textContent = 'Chat Silenciado';
+                chatStatusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-rose-100 text-rose-700';
+                chatInput.disabled = true;
+                chatInput.placeholder = 'El chat ha sido deshabilitado temporalmente...';
+                btnSendChat.disabled = true;
+                btnSendChat.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                chatStatusBadge.textContent = 'Chat Activo';
+                chatStatusBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-emerald-100 text-emerald-700';
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Escribe un mensaje para debatir...';
+                btnSendChat.disabled = false;
+                btnSendChat.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function sendChatMessage(e) {
+            e.preventDefault();
+
+            if (!appSettings.chatActive) {
+                showModal("Chat Silenciado", "La administración ha desactivado el chat temporalmente.");
+                return;
+            }
+
+            if (!currentUser) {
+                showModal("Inicia Sesión", "Debes identificarte antes de escribir en el chat.");
+                return;
+            }
+
+            const input = document.getElementById('chatInput');
+            const rawText = input.value.trim();
+
+            if (!rawText) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newMsg = {
+                id: Date.now(),
+                sender: `${currentUser.nombre} ${currentUser.apellido} (${currentUser.seccion})`,
+                text: sanitizeHTML(rawText),
+                time: timeStr,
+                isSystem: false
+            };
+
+            chatMessages.push(newMsg);
+            setStoredData('evc_chat', chatMessages);
+
+            input.value = '';
+            renderChatMessages();
+        }
+
+        // --- MÓDULO DE ADMINISTRACIÓN (PIN 38759) ---
+        function openAdminAuthModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const pin = document.getElementById('adminPasswordInput').value;
+
+            if (pin === ADMIN_PIN) {
+                closeAdminAuthModal();
+                showView('admin');
+            } else {
+                showModal("Contraseña Incorrecta", "La clave de acceso ingresada es incorrecta.");
+            }
+        }
+
+        function logoutAdmin() {
+            showView('home');
+        }
+
+        function renderAdminDashboard() {
+            // Actualizar textos de botones
+            const statusText = document.getElementById('adminVoteStatusText');
+            const btnToggleVoting = document.getElementById('btnToggleVoting');
+
+            if (appSettings.votingActive) {
+                statusText.textContent = "Abierta";
+                statusText.className = "text-xs text-emerald-600 font-semibold";
+                btnToggleVoting.textContent = "Pausar Votaciones";
+                btnToggleVoting.className = "w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl transition";
+            } else {
+                statusText.textContent = "Pausada";
+                statusText.className = "text-xs text-rose-600 font-semibold";
+                btnToggleVoting.textContent = "Reabrir Votaciones";
+                btnToggleVoting.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition";
+            }
+
+            const chatStatusText = document.getElementById('adminChatStatusText');
+            const btnToggleChat = document.getElementById('btnToggleChat');
+
+            if (appSettings.chatActive) {
+                chatStatusText.textContent = "Activo";
+                chatStatusText.className = "text-xs text-emerald-600 font-semibold";
+                btnToggleChat.textContent = "Silenciar Chat";
+                btnToggleChat.className = "w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl transition";
+            } else {
+                chatStatusText.textContent = "Silenciado";
+                chatStatusText.className = "text-xs text-rose-600 font-semibold";
+                btnToggleChat.textContent = "Activar Chat";
+                btnToggleChat.className = "w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition";
+            }
+
+            document.getElementById('adminTotalVotersCount').textContent = users.length;
+
+            renderAdminVoterList();
+        }
+
+        function toggleVotingStatus() {
+            appSettings.votingActive = !appSettings.votingActive;
+            setStoredData('evc_settings', appSettings);
+            renderAdminDashboard();
+            showModal("Ajuste Actualizado", appSettings.votingActive ? "Las votaciones se han reabierto." : "Las votaciones se han pausado.");
+        }
+
+        function toggleChatStatus() {
+            appSettings.chatActive = !appSettings.chatActive;
+            setStoredData('evc_settings', appSettings);
+            renderAdminDashboard();
+            showModal("Chat Actualizado", appSettings.chatActive ? "El chat de debate ha sido activado." : "El chat de debate ha sido silenciado.");
+        }
+
+        function clearAllDeviceBindings() {
+            users.forEach(u => {
+                u.deviceFingerprint = 'RESET_BY_ADMIN';
+            });
+            setStoredData('evc_users', users);
+            localStorage.removeItem('evc_device_fingerprint');
+            showModal("Dispositivos Desbloqueados", "Se han liberado todas las vinculaciones de dispositivos. Los estudiantes pueden volver a vincular sus equipos.");
+            renderAdminDashboard();
+        }
+
+        function resetAllVotes() {
+            users.forEach(u => {
+                u.vote = null;
+                u.comment = '';
+            });
+            setStoredData('evc_users', users);
+            if (currentUser) {
+                currentUser.vote = null;
+                currentUser.comment = '';
+                setStoredData('evc_current_user', currentUser);
+            }
+            showModal("Votación Reiniciada", "Se han puesto a cero todos los votos y comentarios.");
+            renderAdminDashboard();
+        }
+
+        function renderAdminVoterList() {
+            const tbody = document.getElementById('adminVoterTableBody');
+            tbody.innerHTML = '';
+
+            const sectionFilter = document.getElementById('adminSectionFilter').value;
+
+            let filtered = users;
+            if (sectionFilter !== 'ALL') {
+                filtered = users.filter(u => u.seccion === sectionFilter);
+            }
+
+            // Ordenar alfabéticamente por Nombre
+            filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No hay estudiantes registrados en esta sección.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                let voteBadge = '<span class="text-slate-400 italic">Sin Votar</span>';
+                if (u.vote === 'Chaqueta') {
+                    voteBadge = '<span class="bg-sky-100 text-sky-800 font-bold px-2.5 py-1 rounded-full text-[11px]">Chaqueta</span>';
+                } else if (u.vote === 'Chemis') {
+                    voteBadge = '<span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full text-[11px]">Chemise</span>';
+                }
+
+                const fpShort = u.deviceFingerprint ? u.deviceFingerprint.substring(0, 12) + '...' : 'N/A';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-800">${sanitizeHTML(u.nombre)} ${sanitizeHTML(u.apellido)}</td>
+                    <td class="py-3 px-4 text-center font-semibold text-slate-600">${u.seccion}</td>
+                    <td class="py-3 px-4 text-center">${voteBadge}</td>
+                    <td class="py-3 px-4 text-slate-600 italic max-w-xs truncate">${u.comment ? sanitizeHTML(u.comment) : '-'}</td>
+                    <td class="py-3 px-4 text-center font-mono text-[10px] text-slate-400">${fpShort}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="deleteUserByAdmin('${u.id}')" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-trash mr-1"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteUserByAdmin(userId) {
+            const targetUser = users.find(u => u.id === userId);
+            if (!targetUser) return;
+
+            // Eliminar usuario
+            users = users.filter(u => u.id !== userId);
+            setStoredData('evc_users', users);
+
+            // Si el usuario borrado es el actual logueado
+            if (currentUser && currentUser.id === userId) {
+                currentUser = null;
+                localStorage.removeItem('evc_current_user');
+            }
+
+            showModal("Moderación", `El registro de "${targetUser.nombre} ${targetUser.apellido}" ha sido eliminado con éxito.`);
+            renderAdminDashboard();
+        }
+
+        // --- SISTEMA DE MODAL PERSONALIZADO ---
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // INIT ON LOAD
+        window.onload = function() {
+            updateUserBadge();
+            showView('home');
+        };
+    </script>
+</body>
+</html>
